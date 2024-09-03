@@ -13,7 +13,9 @@ exports.createShelf = async (req, res) => {
 // Listar todas as estantes
 exports.getAllShelves = async (req, res) => {
   try {
-    const shelves = await Shelf.findAll({ include: Equipment });
+    const shelves = await Shelf.findAll({ 
+      include: { model: Equipment, as: 'equipments' } // Inclui o alias correto
+    });
     res.status(200).json(shelves);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -24,7 +26,9 @@ exports.getAllShelves = async (req, res) => {
 exports.getShelfById = async (req, res) => {
   try {
     const { id } = req.params;
-    const shelf = await Shelf.findByPk(id, { include: Equipment });
+    const shelf = await Shelf.findByPk(id, { 
+      include: { model: Equipment, as: 'equipments' } // Inclui o alias correto
+    });
 
     if (!shelf) {
       return res.status(404).json({ error: 'Shelf not found' });

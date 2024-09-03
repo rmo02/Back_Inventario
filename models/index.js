@@ -1,11 +1,17 @@
 const Sequelize = require('sequelize');
 const config = require('../config/database');
+
 const sequelize = new Sequelize(config.development);
 
 const Shelf = require('./Shelf')(sequelize, Sequelize);
 const Equipment = require('./Equipment')(sequelize, Sequelize);
+const Section = require('./Section')(sequelize, Sequelize);
 
-Shelf.hasMany(Equipment, { foreignKey: 'shelfId' });
-Equipment.belongsTo(Shelf, { foreignKey: 'shelfId' });
+// Associações com alias definidos
+Shelf.hasMany(Equipment, { foreignKey: 'shelfId', as: 'equipments' });
+Equipment.belongsTo(Shelf, { foreignKey: 'shelfId', as: 'shelf' });
 
-module.exports = { sequelize, Shelf, Equipment };
+Section.hasMany(Equipment, { foreignKey: 'sectionId', as: 'equipments' });
+Equipment.belongsTo(Section, { foreignKey: 'sectionId', as: 'section' });
+
+module.exports = { sequelize, Shelf, Equipment, Section };
