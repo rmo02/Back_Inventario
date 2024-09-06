@@ -1,9 +1,9 @@
-const { Equipment, Shelf, Section } = require('../models');
+const { Equipment, Shelf, Section, Category } = require('../models');
 
 // Criar um novo equipamento
 exports.createEquipment = async (req, res) => {
   try {
-    const { shelfId, sectionId } = req.body;
+    const { shelfId, sectionId, categoryId } = req.body;
 
     // Verifica se ambos os campos ou nenhum foram fornecidos
     if ((shelfId && sectionId) || (!shelfId && !sectionId)) {
@@ -26,7 +26,15 @@ exports.createEquipment = async (req, res) => {
       }
     }
 
-    // Cria o equipamento com a imagem (se houver)
+    // Verifica se o categoryId foi fornecido e se a Category existe
+    if (categoryId) {
+      const category = await Category.findByPk(categoryId);
+      if (!category) {
+        return res.status(404).json({ error: 'Category não encontrada.' });
+      }
+    }
+
+    // Cria o equipamento com a imagem (se houver) e associa a categoria
     const equipment = await Equipment.create({
       ...req.body,
       image: req.file?.filename,
@@ -45,6 +53,7 @@ exports.getAllEquipment = async (req, res) => {
       include: [
         { model: Shelf, as: 'shelf' },
         { model: Section, as: 'section' },
+        { model: Category, as: 'category' },
       ],
     });
     res.status(200).json(equipment);
@@ -61,6 +70,7 @@ exports.getEquipmentById = async (req, res) => {
       include: [
         { model: Shelf, as: 'shelf' },
         { model: Section, as: 'section' },
+        { model: Category, as: 'category' },
       ],
     });
 
@@ -78,7 +88,7 @@ exports.getEquipmentById = async (req, res) => {
 exports.updateEquipment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { shelfId, sectionId } = req.body;
+    const { shelfId, sectionId, categoryId } = req.body;
     const equipment = await Equipment.findByPk(id);
 
     if (!equipment) {
@@ -106,6 +116,15 @@ exports.updateEquipment = async (req, res) => {
       }
     }
 
+    // Verifica se o categoryId foi fornecido e se a Category existe
+    if (categoryId) {
+      const category = await Category.findByPk(categoryId);
+      if (!category) {
+        return res.status(404).json({ error: 'Category não encontrada.' });
+      }
+    }
+
+    // Atualiza o equipamento com a nova imagem (se houver) e a categoria
     await equipment.update({
       ...req.body,
       image: req.file?.filename || equipment.image,
