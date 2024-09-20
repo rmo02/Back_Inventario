@@ -7,10 +7,10 @@ const {
   updateEquipment,
   deleteEquipment,
 } = require('../controllers/equipmentController');
-const upload = require('../middleware/multerConfig');
+const { upload, handleMulterError } = require('../middleware/multerConfig');
 
 // Criar um novo equipamento
-router.post('/', upload.single('image'), createEquipment);
+router.post('/', upload.single('image'), handleMulterError, createEquipment);
 
 // Listar todos os equipamentos
 router.get('/', getAllEquipment);
@@ -19,7 +19,7 @@ router.get('/', getAllEquipment);
 router.get('/:id', getEquipmentById);
 
 // Atualizar um equipamento
-router.put('/:id', upload.single('image'), updateEquipment);
+router.put('/:id', upload.single('image'), handleMulterError, updateEquipment);
 
 // Excluir um equipamento
 router.delete('/:id', deleteEquipment);
