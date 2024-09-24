@@ -15,7 +15,7 @@ Equipment.belongsTo(Shelf, { foreignKey: 'shelfId', as: 'shelf' });
 Section.hasMany(Equipment, { foreignKey: 'sectionId', as: 'equipments' });
 Equipment.belongsTo(Section, { foreignKey: 'sectionId', as: 'section' });
 
-Category.hasMany(Category, { foreignKey: 'categoryId', as: 'categories' });
-Equipment.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
+Category.hasMany(Equipment, { foreignKey: 'categoryId', as: 'equipments' }); // Uma categoria tem muitos equipamentos
+Equipment.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' }); // Um equipamento pertence a uma categoria
 
 module.exports = { sequelize, Shelf, Equipment, Section, Category };

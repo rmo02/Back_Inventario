@@ -14,10 +14,10 @@ exports.createCategory = async (req, res) => {
 exports.getAllCategory = async (req, res) => {
   try {
     const category = await Category.findAll({ 
-      include: { model: Equipment, as: 'equipments' }
     });
     res.status(200).json(category);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: error.message });
   }
 };

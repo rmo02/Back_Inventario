@@ -27,5 +27,5 @@ app.use('/api/category', categoryRoutes);
 
 // Iniciar a sincronização com o banco de dados e o servidor
 sequelize.sync().then(() => {
-  app.listen(3000, () => console.log('Server running on port 3000'));
+  app.listen(3000, () => console.log("Server running on port 3000"));
 });
