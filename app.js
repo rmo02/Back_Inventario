@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
 const { sequelize } = require('./models');
 const shelfRoutes = require('./routes/shelfRoutes');
@@ -9,9 +10,16 @@ const categoryRoutes = require('./routes/categoryRoutes');
 
 const app = express();
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+}));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.json());
+
 app.use('/api/shelves', shelfRoutes);
 app.use('/api/section', sectionRoutes);
 app.use('/api/equipment', equipmentRoutes);
