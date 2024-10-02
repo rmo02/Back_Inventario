@@ -98,7 +98,7 @@ exports.getEquipmentById = async (req, res) => {
 exports.updateEquipment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { shelfId, sectionId, categoryId } = req.body;
+    const { shelfId, sectionId, categoryId, name, description } = req.body; // Adicione outros campos conforme necessário
 
     // Encontrar o equipamento por ID
     const equipment = await Equipment.findByPk(id);
@@ -119,9 +119,8 @@ exports.updateEquipment = async (req, res) => {
       }
       // Atualizar para a estante e remover de qualquer seção
       await equipment.update({
-        shelfId,
+        ...req.body, // Atualiza com todos os campos fornecidos
         sectionId: null,  // Remove o sectionId, movendo o equipamento para a estante
-        categoryId: categoryId || equipment.categoryId,
         image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
       });
     }
@@ -134,9 +133,14 @@ exports.updateEquipment = async (req, res) => {
       }
       // Atualizar para a seção e remover de qualquer estante
       await equipment.update({
-        sectionId,
+        ...req.body, // Atualiza com todos os campos fornecidos
         shelfId: null,  // Remove o shelfId, movendo o equipamento para a seção
-        categoryId: categoryId || equipment.categoryId,
+        image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
+      });
+    } else {
+      // Se nem shelfId nem sectionId foram fornecidos, atualize normalmente
+      await equipment.update({
+        ...req.body, // Atualiza com todos os campos fornecidos
         image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
       });
     }
@@ -146,6 +150,7 @@ exports.updateEquipment = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 
 // Excluir um equipamento
