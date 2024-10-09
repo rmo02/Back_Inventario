@@ -1,4 +1,6 @@
 const { Equipment, Shelf, Section, Category } = require('../models');
+const fs = require('fs');
+const path = require('path');
 
 // Função para formatar o equipamento e adicionar a URL do backend à imagem
 const formatEquipment = (equipment, req) => {
@@ -98,7 +100,7 @@ exports.getEquipmentById = async (req, res) => {
 exports.updateEquipment = async (req, res) => {
   try {
     const { id } = req.params;
-    const { shelfId, sectionId, categoryId, name, description } = req.body; // Adicione outros campos conforme necessário
+    const { shelfId, sectionId, categoryId, name, description } = req.body;
 
     // Encontrar o equipamento por ID
     const equipment = await Equipment.findByPk(id);
@@ -111,37 +113,47 @@ exports.updateEquipment = async (req, res) => {
       return res.status(400).json({ error: 'Informe apenas um dos campos: shelfId ou sectionId.' });
     }
 
-    // Se shelfId for fornecido, verificar se a estante existe
+    let newImagePath;
+
+    // Se uma nova imagem for enviada, definir o novo caminho da imagem
+    if (req.file) {
+      newImagePath = req.file.filename;
+      const oldImagePath = path.join(__dirname, '..', 'uploads', equipment.image);
+      
+      // Verifica se existe uma imagem antiga e exclui
+      if (equipment.image && fs.existsSync(oldImagePath)) {
+        fs.unlinkSync(oldImagePath); // Remove a imagem antiga do sistema de arquivos
+      }
+    }
+
+    // Atualizar equipamento para uma estante ou seção
     if (shelfId) {
       const shelf = await Shelf.findByPk(shelfId);
       if (!shelf) {
         return res.status(404).json({ error: 'Shelf não encontrado.' });
       }
-      // Atualizar para a estante e remover de qualquer seção
-      await equipment.update({
-        ...req.body, // Atualiza com todos os campos fornecidos
-        sectionId: null,  // Remove o sectionId, movendo o equipamento para a estante
-        image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
-      });
-    }
 
-    // Se sectionId for fornecido, verificar se a seção existe
-    if (sectionId) {
+      await equipment.update({
+        ...req.body,
+        sectionId: null, // Remove o sectionId
+        image: newImagePath || equipment.image, // Atualiza a imagem se houver uma nova
+      });
+    } else if (sectionId) {
       const section = await Section.findByPk(sectionId);
       if (!section) {
         return res.status(404).json({ error: 'Section não encontrado.' });
       }
-      // Atualizar para a seção e remover de qualquer estante
+
       await equipment.update({
-        ...req.body, // Atualiza com todos os campos fornecidos
-        shelfId: null,  // Remove o shelfId, movendo o equipamento para a seção
-        image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
+        ...req.body,
+        shelfId: null, // Remove o shelfId
+        image: newImagePath || equipment.image, // Atualiza a imagem se houver uma nova
       });
     } else {
-      // Se nem shelfId nem sectionId foram fornecidos, atualize normalmente
+      // Atualiza normalmente se nenhum shelfId ou sectionId for fornecido
       await equipment.update({
-        ...req.body, // Atualiza com todos os campos fornecidos
-        image: req.file?.filename || equipment.image, // Mantém a imagem atual se não for enviada uma nova
+        ...req.body,
+        image: newImagePath || equipment.image, // Atualiza a imagem se houver uma nova
       });
     }
 
@@ -150,8 +162,6 @@ exports.updateEquipment = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-
 
 // Excluir um equipamento
 exports.deleteEquipment = async (req, res) => {
